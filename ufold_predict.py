@@ -20,6 +20,10 @@ from ufold.data_generator import Dataset_Cut_concat_new_merge_two as Dataset_FCN
 import collections
 
 import subprocess
+
+import torch.multiprocessing as mp
+mp.set_start_method('spawn', force=True)
+
 args = get_args()
 if args.nc:
     from ufold.postprocess import postprocess_new_nc as postprocess
@@ -143,7 +147,7 @@ def type_pairs(pairs, sequence):
 
 
 def model_eval_all_test(contact_net,test_generator):
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     contact_net.train()
     result_no_train = list()
     result_no_train_shift = list()
@@ -270,7 +274,7 @@ def model_eval_all_test(contact_net,test_generator):
 
 def main():
     torch.multiprocessing.set_sharing_strategy('file_system')
-    torch.cuda.set_device(1)
+    torch.cuda.set_device(0)
 
     print('Welcome using UFold prediction tool!!!')
 
@@ -294,7 +298,7 @@ def main():
 
     MODEL_SAVED = 'models/ufold_train_alldata.pt'
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     seed_torch()
         
@@ -311,7 +315,7 @@ def main():
 
     #pdb.set_trace()
     print('==========Start Loading Pretrained Model==========')
-    contact_net.load_state_dict(torch.load(MODEL_SAVED,map_location='cuda:1'))
+    contact_net.load_state_dict(torch.load(MODEL_SAVED,map_location='cuda'))
     print('==========Finish Loading Pretrained Model==========')
     # contact_net = nn.DataParallel(contact_net, device_ids=[3, 4])
     contact_net.to(device)
